@@ -25,7 +25,11 @@ const experiences = [
 function ExperienceItem({ exp, idx, start, end, scrollYProgress, layout }) {
   const scale = useTransform(scrollYProgress, [start, end], [0, 1]);
   const opacity = useTransform(scrollYProgress, [start, end], [0, 1]);
-  const y = useTransform(scrollYProgress, [start, end], [idx % 2 === 0 ? 30 : -30, 0]);
+  
+  // Odd items (Index 1) go UP, Even items (Index 0, 2) go DOWN
+  const isUp = idx % 2 !== 0; 
+  
+  const y = useTransform(scrollYProgress, [start, end], [isUp ? 30 : -30, 0]);
   const x = useTransform(scrollYProgress, [start, end], [-24, 0]);
 
   if (layout === "desktop") {
@@ -35,18 +39,25 @@ function ExperienceItem({ exp, idx, start, end, scrollYProgress, layout }) {
           className="z-10 w-7 h-7 rounded-full bg-white shadow-[0_0_0_8px_rgba(255,255,255,0.1)]"
           style={{ scale, opacity }}
         ></motion.div>
+        
+        {/* FIXED: Precisely anchored connector line to avoid layout shifting */}
         <motion.div
-          className={`absolute ${idx % 2 === 0 ? "-top-8" : "bottom-8"} w-[3px] bg-white/40`}
+          className={`absolute w-[3px] bg-white/40 ${
+            isUp ? "bottom-[calc(50%+14px)]" : "top-[calc(50%+14px)]"
+          }`}
           style={{ height: 40, opacity }}
         ></motion.div>
+
+        {/* FIXED: Precisely anchored the card so it never overlaps the main timeline */}
         <motion.article
-          className={`absolute ${idx % 2 === 0 ? "bottom-12" : "top-12"} bg-gray-900/80 backdrop-blur border border-gray-700/70 rounded-xl p-7 w-[320px] shadow-lg`}
+          className={`absolute ${
+            isUp ? "bottom-[calc(50%+54px)]" : "top-[calc(50%+54px)]"
+          } bg-gray-900/80 backdrop-blur border border-gray-700/70 rounded-xl p-7 w-[320px] shadow-lg`}
           style={{ opacity, y, maxWidth: "90vw" }}
           transition={{ duration: 0.4, delay: idx * 0.15 }}
         >
           <h3 className="text-xl font-semibold">{exp.role}</h3>
           
-          {/* UPDATED: Date on a new line */}
           <div className="text-md text-gray-400 mb-3 mt-1">
             <span className="block font-medium text-gray-300">{exp.company}</span>
             <span className="block text-sm text-gray-500 mt-1">{exp.duration}</span>
@@ -72,7 +83,6 @@ function ExperienceItem({ exp, idx, start, end, scrollYProgress, layout }) {
       >
         <h3 className="text-lg font-semibold break-words">{exp.role}</h3>
         
-        {/* UPDATED: Date on a new line for mobile */}
         <div className="text-sm text-gray-400 mb-2 mt-1">
            <span className="block font-medium text-gray-300">{exp.company}</span>
            <span className="block text-xs text-gray-500 mt-0.5">{exp.duration}</span>
